@@ -1,0 +1,91 @@
+
+import pandas as pd
+import numpy as np
+import re
+import spacy
+import matplotlib.pyplot as plt
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
+# 1. Load spaCy model
+nlp = spacy.load("en_core_web_sm")
+# 2. Sample Resume Data (Replace with Dataset if needed)
+resumes = [
+    "Python developer with 3 years experience in Django, SQL and REST APIs. Worked on Machine Learning projects.",
+    "Data analyst skilled in Excel, Power BI, SQL and basic Python. Experience in data visualization.",
+    "Frontend developer experienced in HTML, CSS, JavaScript and React.",
+    "Machine Learning engineer with strong Python, TensorFlow, SQL and deep learning experience."
+]
+df = pd.DataFrame(resumes, columns=["resume_text"])
+# 3. Job Description
+job_description = """
+We are looking for a Python developer with experience in Django,
+SQL, REST APIs, and Machine Learning. Knowledge of TensorFlow is a plus.
+# 4. Text Cleaning Function
+def clean_text(text):
+    text = text.lower()
+    text = re.sub(r'[^a-zA-Z\s]', '', text)
+    text = re.sub(r'\s+', ' ', text)
+    return text.strip()
+df["cleaned_resume"] = df["resume_text"].apply(clean_text)
+cleaned_job_description = clean_text(job_description)
+# 5. Skill Keyword List
+skill_keywords = [
+    "python", "django", "sql", "machine learning",
+    "tensorflow", "excel", "power bi",
+    "react", "javascript", "html", "css", "rest", "apis"
+]
+# 6. Skill Extraction Function
+def extract_skills(text):
+    skills_found = []
+    for skill in skill_keywords:
+        if skill in text:
+            skills_found.append(skill)
+    return skills_found
+df["extracted_skills"] = df["cleaned_resume"].apply(extract_skills)
+# 7. TF-IDF Vectorization
+vectorizer = TfidfVectorizer()
+all_documents = df["cleaned_resume"].tolist() + [cleaned_job_description]
+tfidf_matrix = vectorizer.fit_transform(all_documents)
+resume_vectors = tfidf_matrix[:-1]
+job_vector = tfidf_matrix[-1]
+# 8. Cosine Similarity Calculation
+similarity_scores = cosine_similarity(resume_vectors, job_vector)
+df["similarity_score"] = similarity_scores
+# 9. Skill Match Percentage
+job_skills = extract_skills(cleaned_job_description)
+def skill_match_percentage(resume_skills):
+    if len(job_skills) == 0:
+        return 0
+    match_count = len(set(resume_skills).intersection(set(job_skills)))
+    return (match_count / len(job_skills)) * 100
+df["skill_match_percent"] = df["extracted_skills"].apply(skill_match_percentage)
+# 10. Final Scoring Formula
+# Weighting: 70% similarity + 30% skill match
+df["final_score"] = (
+    0.7 * df["similarity_score"] +
+    0.3 * (df["skill_match_percent"] / 100)
+)
+# 11. Skill Gap Identification
+def find_missing_skills(resume_skills):
+    return list(set(job_skills) - set(resume_skills))
+df["missing_skills"] = df["extracted_skills"].apply(find_missing_skills)
+# 12. Rank Candidates
+df = df.sort_values(by="final_score", ascending=False)
+df.reset_index(drop=True, inplace=True)
+# 13. Display Results
+print("\n========= RANKED CANDIDATES =========\n")
+for i, row in df.iterrows():
+    print(f"Rank {i+1}")
+    print("Resume:", row["resume_text"])
+    print("Similarity Score:", round(row["similarity_score"], 3))
+    print("Skill Match %:", round(row["skill_match_percent"], 2))
+    print("Final Score:", round(row["final_score"], 3))
+    print("Missing Skills:", row["missing_skills"])
+    print("-" * 50)
+# 14. Visualization
+plt.figure()
+plt.bar(range(len(df)), df["final_score"])
+plt.xlabel("Candidate Rank")
+plt.ylabel("Final Score")
+plt.title("Candidate Ranking Based on Job Fit")
+plt.show()

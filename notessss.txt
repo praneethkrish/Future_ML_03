@@ -1,0 +1,259 @@
+Here are **clear, structured notes** for your code  (easy to study + revise)
+
+
+
+Resume Screening System – Notes
+
+  1. Purpose of the Project
+
+* This code builds a **Resume Screening System**
+* It compares resumes with a **job description**
+* It ranks candidates based on:
+
+  * Text similarity (TF-IDF + cosine similarity)
+  * Skill matching**
+
+
+
+ 2. Libraries Used
+
+* **pandas** → Data handling
+* **numpy** → Numerical operations
+* **re** → Text cleaning (regex)
+* **spacy** → NLP processing
+* **matplotlib** → Visualization
+* **sklearn** →
+
+  * `TfidfVectorizer` → Convert text to numbers
+  * `cosine_similarity` → Compare similarity
+
+
+
+ 3. Data Preparation
+
+* Resumes stored in a list
+* Converted into a DataFrame:
+
+```python
+df = pd.DataFrame(resumes, columns=["resume_text"])
+```
+
+
+
+  4. Job Description
+
+* A sample job description is defined
+* Used as a **reference for comparison**
+
+
+
+ 5. Text Cleaning
+
+Function:
+
+```python
+def clean_text(text):
+```
+
+  Steps:
+
+* Convert to lowercase
+* Remove special characters
+* Remove extra spaces
+
+ Purpose: Makes text uniform for better matching
+ 
+
+ 6. Skill Keywords
+
+```python
+skill_keywords = ["python", "django", "sql", ...]
+```
+
+* Predefined list of important skills
+* Used to extract skills from resumes
+
+
+
+  7. Skill Extraction
+
+Function:
+
+```python
+def extract_skills(text):
+```
+
+  Logic:
+
+* Check if each keyword exists in text
+* Store matched skills
+
+  Output example:
+
+```python
+["python", "sql", "django"]
+```
+
+
+
+ 8. TF-IDF Vectorization
+
+```python
+vectorizer = TfidfVectorizer()
+```
+
+ What it does:
+
+* Converts text into **numerical vectors**
+* Measures importance of words
+
+ Process:
+
+* Combine resumes + job description
+* Transform into matrix
+
+
+
+ 9. Cosine Similarity
+
+```python
+cosine_similarity(resume_vectors, job_vector)
+```
+
+ Purpose:
+
+* Measures similarity between:
+
+  * Resume
+  * Job description
+
+ Range:
+
+* 0 → No similarity
+* 1 → Exact match
+
+
+
+ 10. Skill Match Percentage
+
+Function:
+
+```python
+def skill_match_percentage(resume_skills):
+```
+
+ Formula:
+
+[
+\text{Match %} = \frac{\text{Matched Skills}}{\text{Job Skills}} \times 100
+]
+
+ Example:
+
+* Job skills = 5
+* Matched = 3
+  → 60%
+
+
+  11. Final Score Calculation
+
+```python
+df["final_score"] = 0.7 * similarity + 0.3 * skill_match
+```
+
+ Weightage:
+
+ **70% → Text similarity**
+ **30% → Skill match**
+
+ Gives balanced evaluation
+
+
+
+
+ 12. Skill Gap Identification
+
+Function:
+
+```python
+def find_missing_skills(resume_skills):
+```
+
+ Output:
+
+* Skills required but missing in resume
+
+ Useful for:
+
+* Candidate feedback
+* Improvement suggestions
+
+
+
+ 13. Ranking Candidates
+
+```python
+df.sort_values(by="final_score", ascending=False)
+```
+
+* Highest score → Rank 1
+* Sorted in descending order
+
+
+
+ 14. Output Display
+
+  Shows:
+
+  * Resume
+  * Similarity score
+  * Skill match %
+  * Final score
+  * Missing skills
+
+ 15. Visualization
+
+```python
+plt.bar(...)
+```
+
+* Bar chart of candidate scores
+* Helps in quick comparison
+
+
+  Overall Workflow
+
+1. Input resumes & job description
+2. Clean text
+3. Extract skills
+4. Convert text → vectors (TF-IDF)
+5. Compute similarity
+6. Calculate skill match
+7. Combine scores
+8. Rank candidates
+9. Show results + graph
+
+
+
+Key Concepts to Remember**
+
+* TF-IDF → Word importance
+* Cosine Similarity → Text similarity
+* Skill Matching → Keyword-based filtering
+* Final Score → Weighted combination
+
+
+# Improvements You Can Add**
+
+* Use NER (spaCy)** for better skill extraction
+* Add more skills dynamically**
+* Use BERT/AI models** for smarter matching
+* Upload resumes as PDFs instead of text
+* Build a web app (Flask/Streamlit)
+
+
+If you want, I can also:
+
+ Convert this into **exam notes (short version)
+ Explain each line of code
+ Help you turn this into a  mini project with UI
